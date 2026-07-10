@@ -1,0 +1,38 @@
+{
+  "name": "@deluke84/pi-usage",
+  "version": "1.2.0",
+  "description": "A pi extension that displays active model provider quota usage in the status bar, with provider-specific quota windows and reset times.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Maciej Augustyniak <maciej.f.august@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DeLuke84/pi-usage"
+  },
+  "keywords": [
+    "pi-package"
+  ],
+  "pi": {
+    "extensions": [
+      "."
+    ]
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/temp": "^0.9.4",
+    "temp": "^0.9.4"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
