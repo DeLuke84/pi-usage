@@ -8,7 +8,6 @@ Shows subscription quota usage in pi's footer status bar for your active model p
 
 - **z.ai (GLM)** — 5-hour and weekly quotas with dynamic reset times
 - **OpenAI Codex** — Quota windows derived from the API (for example 5-hour/weekly subscriptions or a 30-day Free-plan window)
-- **GitHub Copilot** — Premium-interaction quota with its 30-day reset window
 
 Displays as a percentage used (e.g., `5h: 16% | week: 4%`).
 
@@ -32,7 +31,6 @@ Example outputs:
 
 - **z.ai (GLM)**: `https://api.z.ai/api/monitor/usage/quota/limit` with API key from `~/.pi/agent/auth.json` → `zai.key`
 - **OpenAI Codex**: `https://chatgpt.com/backend-api/wham/usage` using `~/.pi/agent/auth.json` → `openai-codex` OAuth state. `limit_window_seconds` determines whether a window is rendered as hours, a week, or days.
-- **GitHub Copilot**: `copilot_internal/user` (with a chat-header fallback) using the `github-copilot` OAuth state; premium interactions are rendered as a 30-day window.
 
 **Example response:**
 

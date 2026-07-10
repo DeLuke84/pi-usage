@@ -89,9 +89,7 @@ async function fetchCopilotUserSnapshot(auth: GitHubCopilotAuth): Promise<Pick<U
   const reset = parseResetTime(data.quota_reset_date_utc ?? data.quota_reset_date);
   const limits: UsageLimitView[] = [];
 
-  // GitHub exposes this quota with a monthly reset date. It is a 30-day
-  // premium-interactions window, not a generic "premium" counter.
-  const premium = quotaToLimit("30d", data.quota_snapshots?.premium_interactions, reset, "date");
+  const premium = quotaToLimit("premium", data.quota_snapshots?.premium_interactions, reset, "date");
   if (premium) limits.push(premium);
 
   return {
@@ -149,7 +147,7 @@ async function probeCopilotChat(auth: GitHubCopilotAuth): Promise<Pick<UsageSnap
 
   // Enterprise Copilot often exposes the monthly premium quota only on probe headers.
   const premium = parseWindowHeader(response.headers.get("x-quota-snapshot-premium_interactions"));
-  if (premium) limits.push(windowToLimit("30d", premium, "date"));
+  if (premium) limits.push(windowToLimit("premium", premium, "date"));
 
   // Consume body so the connection can be reused; ignore parse errors/content.
   await response.arrayBuffer().catch(() => undefined);

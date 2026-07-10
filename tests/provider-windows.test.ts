@@ -50,7 +50,7 @@ test("keeps Codex subscription windows provider-specific", () => {
   ]);
 });
 
-test("renders GitHub Copilot premium interactions as a 30-day quota", async () => {
+test("preserves GitHub Copilot's premium-interactions quota label", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () => new Response(JSON.stringify({
     copilot_plan: "pro",
@@ -68,7 +68,7 @@ test("renders GitHub Copilot premium interactions as a 30-day quota", async () =
     });
 
     assert.deepEqual(snapshot.limits, [{
-      label: "30d",
+      label: "premium",
       percentage: 28,
       nextResetTime: Date.parse("2026-08-01T00:00:00Z"),
       resetStyle: "date",
