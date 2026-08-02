@@ -53,7 +53,7 @@ export function formatUsageSegments(snapshot: UsageSnapshot): UsageStatusSegment
     const label = formatLimitLabel(limit.label);
     const resetTime = formatCompactResetTime(limit.nextResetTime, resetStyleToUnit(limit.resetStyle));
     return {
-      text: `${label} ${limit.percentage}% ${RESET_SYMBOL} ${resetTime}`,
+      text: `${label} ${formatPercentage(usedPercentage)}% ${RESET_SYMBOL} ${resetTime}`,
       usedPercentage,
       severity: severityForUsedPercentage(usedPercentage),
     };
@@ -91,6 +91,14 @@ function formatLimitLabel(label: string): string {
 function clampPercentage(percentage: number): number {
   if (!Number.isFinite(percentage)) return 0;
   return Math.max(0, Math.min(100, percentage));
+}
+
+// Provider APIs derive percentages via float subtraction (e.g. 100 - 93.8),
+// which can yield values like 6.200000000000003. Round to one decimal place
+// for display and drop it entirely when the result is a whole number.
+function formatPercentage(percentage: number): string {
+  const rounded = Math.round(percentage * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
 function severityForUsedPercentage(usedPercentage: number): UsageSeverity {
