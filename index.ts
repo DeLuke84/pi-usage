@@ -118,7 +118,11 @@ export default function (pi: ExtensionAPI): void {
     );
   });
 
-  pi.on("session_shutdown", () => controller.stop());
+  pi.on("session_shutdown", () => {
+    ++refreshSeq;
+    currentCtx = null;
+    controller.stop();
+  });
 }
 
 function colorForSeverity(severity: "ok" | "warning" | "critical"): { background: string; foreground: string } {
