@@ -1,6 +1,6 @@
 # pi-usage
 
-A [pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent) extension that displays your active model provider's subscription quota usage in the status bar. Supports z.ai (GLM Coding Plan) and OpenAI Codex subscriptions.
+A [pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent) extension that displays your active model provider's subscription quota usage in the status bar. Supports z.ai (GLM Coding Plan), OpenAI Codex subscriptions, and the Xiaomi MiMo Token Plan.
 
 ## What it does
 
@@ -8,6 +8,7 @@ Shows subscription quota usage in pi's footer status bar for your active model p
 
 - **z.ai (GLM)** — 5-hour and weekly quotas with dynamic reset times
 - **OpenAI Codex** — Quota windows derived from the API (for example 5-hour/weekly subscriptions or a 30-day Free-plan window)
+- **Xiaomi MiMo (Token Plan)** — plan quota with the reset at the provider-reported period end (compensation credits while granted)
 
 Displays as a percentage used (e.g., `5h: 16% | week: 4%`).
 
@@ -22,6 +23,7 @@ Example outputs:
 
 ```
 5h 16% ↻ 2h14 · 1w 4% ↻ Mo
+plan 47% ↻ Oct23
 30d 17% ↻ Aug 9
 ```
 
@@ -31,6 +33,7 @@ Example outputs:
 
 - **z.ai (GLM)**: `https://api.z.ai/api/monitor/usage/quota/limit` with API key from `~/.pi/agent/auth.json` → `zai.key`
 - **OpenAI Codex**: `https://chatgpt.com/backend-api/wham/usage` using `~/.pi/agent/auth.json` → `openai-codex` OAuth state. `limit_window_seconds` determines whether a window is rendered as hours, a week, or days.
+- **Xiaomi MiMo (Token Plan)**: `https://platform.xiaomimimo.com/api/v1/tokenPlan/detail` and `/tokenPlan/usage` with the live `platform.xiaomimimo.com` session cookie read from the browser's Chromium cookie store (Vivaldi, Chrome, Brave, Arc) and the console's `userId` query parameter. Session cookies rotate frequently, so pi-usage reads them fresh at every refresh. Fallbacks: `PI_USAGE_TOKEN_PLAN_COOKIE` or `xiaomi-token-plan-ams.cookie` in `~/.pi/agent/auth.json`.
 
 **Example response:**
 
@@ -87,6 +90,7 @@ Uses `ctx.ui.setStatus("pi-usage", ...)` to render a provider-neutral status bar
 
 ```
 5h 16% ↻ 2h14 · 1w 4% ↻ Mo
+plan 47% ↻ Oct23
 30d 17% ↻ Aug 9
 ```
 
