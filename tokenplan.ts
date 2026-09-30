@@ -16,7 +16,8 @@ const ITEM_LABELS: Record<string, string> = {
 /**
  * Parse the platform's `tokenPlan/detail` and `tokenPlan/usage` responses into
  * the shared usage snapshot shape. The platform reports `percent` fields as
- * 0..1 ratios, so percentages are derived from `used`/`limit` instead.
+ * 0..1 ratios, so percentages are derived from `used`/`limit` instead. The
+ * monthly window (`monthUsage`) mirrors the plan quota and is not shown.
  */
 export function parseTokenPlanResponses(detail: unknown, usage: unknown): UsageSnapshot {
   assertOkCode(detail, "detail");
@@ -26,10 +27,7 @@ export function parseTokenPlanResponses(detail: unknown, usage: unknown): UsageS
   const usageData = asRecord(asRecord(usage).data);
   const nextResetTime = parsePeriodEnd(detailData.currentPeriodEnd);
 
-  const limits = [
-    ...parseUsageItems(asRecord(usageData.monthUsage).items, nextResetTime),
-    ...parseUsageItems(asRecord(usageData.usage).items, nextResetTime),
-  ];
+  const limits = parseUsageItems(asRecord(usageData.usage).items, nextResetTime);
   if (limits.length === 0) throw new Error("Token Plan usage response missing quota windows");
 
   return { provider: "token-plan", label: "Token Plan", limits };

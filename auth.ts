@@ -2,6 +2,8 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
+import { readTokenPlanBrowserCookie } from "./browser-cookies";
+
 const DEFAULT_AUTH_PATH = ".pi/agent/auth.json";
 
 interface AuthConfig {
@@ -76,10 +78,20 @@ export function getGitHubCopilotAuth(): GitHubCopilotAuthConfig {
 export function getTokenPlanCookie(): string {
   const envCookie = process.env.PI_USAGE_TOKEN_PLAN_COOKIE;
   if (envCookie?.trim()) return envCookie.trim();
+
+  // The platform rotates session cookies frequently, so the live browser
+  // cookie is the primary source and the stored cookie only a fallback.
+  const browserCookie = readTokenPlanBrowserCookie();
+  if (browserCookie) return browserCookie;
+
   const authFilePath = getAuthFilePath();
   try {
     const cookie = readAuthConfig()["xiaomi-token-plan-ams"]?.cookie;
-    if (!cookie) throw new Error("xiaomi-token-plan-ams.cookie not found in auth.json");
+    if (!cookie) {
+      throw new Error(
+        "no platform.xiaomimimo.com session cookie found; log in to the MiMo platform in your browser or set PI_USAGE_TOKEN_PLAN_COOKIE",
+      );
+    }
     return cookie;
   } catch (error) {
     throw authError(error, authFilePath, "Token Plan session cookie");
