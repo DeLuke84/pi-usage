@@ -1,7 +1,7 @@
 import type { ParsedQuota } from "./types";
 import { Unit } from "./types";
 
-export type UsageProvider = "glm" | "codex" | "github-copilot";
+export type UsageProvider = "glm" | "codex" | "github-copilot" | "token-plan";
 export type ResetStyle = "relative" | "weekday" | "date";
 
 export interface UsageLimitView {
@@ -22,6 +22,7 @@ export function selectUsageProvider(model?: { provider?: string | null } | null)
   if (model?.provider === "zai") return "glm";
   if (model?.provider === "openai-codex") return "codex";
   if (model?.provider === "github-copilot") return "github-copilot";
+  if (model?.provider === "xiaomi-token-plan-ams") return "token-plan";
   return null;
 }
 

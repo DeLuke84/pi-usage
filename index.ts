@@ -4,8 +4,9 @@ import { createPeriodicRefresh } from "./timer";
 import { fetchQuota } from "./api";
 import { fetchCodexUsage } from "./codex";
 import { fetchGitHubCopilotUsage } from "./copilot";
+import { fetchTokenPlanUsage } from "./tokenplan";
 import { formatErrorMessage, formatErrorState, formatUsageSegments, formatUsageStatus } from "./format";
-import { getApiKey, getCodexAuth, getGitHubCopilotAuth } from "./auth";
+import { getApiKey, getCodexAuth, getGitHubCopilotAuth, getTokenPlanCookie } from "./auth";
 import { quotaToUsageSnapshot, selectUsageProvider } from "./usage";
 
 const STATUS_ID = "pi-usage";
@@ -48,6 +49,8 @@ export default function (pi: ExtensionAPI): void {
 
   async function fetchActiveUsage(provider: UsageProvider, ctx: PiContext): Promise<UsageSnapshot> {
     if (provider === "glm") return quotaToUsageSnapshot(await fetchQuota(getApiKey()));
+
+    if (provider === "token-plan") return fetchTokenPlanUsage({ cookie: getTokenPlanCookie() });
 
     if (provider === "github-copilot") {
       const stored = getGitHubCopilotAuth();

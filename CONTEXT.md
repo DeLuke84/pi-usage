@@ -24,6 +24,14 @@ _Avoid_: API usage, spend, token accounting, remaining-quota percentage
 OpenAI subscription quota consumption for OpenAI-hosted Codex models, fetched from read-only undocumented OpenAI account endpoints using pi's existing `openai-codex` account login with pi-owned token refresh when available.
 _Avoid_: OpenAI API usage, local Codex CLI stats, separate extension credentials, public API-only constraint, quota-consuming probes, failure-only inference, extension-owned OAuth writes
 
+**Token Plan Usage**:
+Xiaomi MiMo Token Plan quota consumption for Token Plan models, fetched from the platform console endpoints using the browser's platform session cookie and the console's `userId` request parameter.
+_Avoid_: API key auth, local token counting, quota-consuming probes, invented quota windows, model-name matching
+
+**Token Plan Model**:
+Any selected pi model whose provider is `xiaomi-token-plan-ams`.
+_Avoid_: MiMo model-name matching, regional provider suffix guessing
+
 **GLM Usage**:
 z.ai subscription quota consumption for GLM Coding Plan models.
 _Avoid_: z.ai API usage, generic GLM stats
@@ -37,7 +45,8 @@ _Avoid_: GLM-specific status naming, multiple provider badges, inactive quota di
 - A **Provider** exposes exactly one **Subscription Usage** view in the status bar.
 - A **Codex Model** selects **Codex Usage** for the **Active Usage Display**.
 - A **GLM Model** selects **GLM Usage** for the **Active Usage Display**.
-- **Codex Usage** and **GLM Usage** are provider-specific forms of **Subscription Usage**.
+- A **Token Plan Model** selects **Token Plan Usage** for the **Active Usage Display**.
+- **Codex Usage**, **GLM Usage**, and **Token Plan Usage** are provider-specific forms of **Subscription Usage**.
 - **Codex Usage** uses pi's stored `openai-codex` auth state.
 - **Codex Usage** may depend on undocumented OpenAI account endpoints.
 - Undocumented endpoint discovery is validated with pi auth and minimal GET/HEAD-only live probes before implementation.
@@ -48,6 +57,9 @@ _Avoid_: GLM-specific status naming, multiple provider badges, inactive quota di
 - **Codex Usage** mirrors the **GLM Usage** display shape when equivalent limits exist.
 - **Codex Usage** shows only provider-exposed limits when they do not match **GLM Usage** periods.
 - When multiple OpenAI endpoints exist, **Codex Usage** prefers subscription/account limit semantics over per-request token history.
+- **Token Plan Usage** authenticates with the `platform.xiaomimimo.com` session cookie stored as `xiaomi-token-plan-ams.cookie` in pi's auth file, or `PI_USAGE_TOKEN_PLAN_COOKIE`.
+- **Token Plan Usage** shows only provider-exposed windows: `month_total_token`, `plan_total_token`, and compensation credits while they carry a limit.
+- **Token Plan Usage** resets at the provider-reported `currentPeriodEnd`.
 - **Codex Usage** shows `Codex` without a plan label when OpenAI does not expose the plan name.
 - **Subscription Usage** percentages mean used quota, not remaining quota.
 - Relative reset durations are normalized to absolute reset timestamps before display.

@@ -8,6 +8,11 @@ interface AuthConfig {
   zai: { key: string };
   "openai-codex": CodexAuthConfig;
   "github-copilot": GitHubCopilotAuthConfig;
+  "xiaomi-token-plan-ams": TokenPlanAuthConfig;
+}
+
+export interface TokenPlanAuthConfig {
+  cookie?: string;
 }
 
 export interface CodexAuthConfig {
@@ -65,6 +70,19 @@ export function getGitHubCopilotAuth(): GitHubCopilotAuthConfig {
     return copilot;
   } catch (error) {
     throw authError(error, authFilePath, "GitHub Copilot auth");
+  }
+}
+
+export function getTokenPlanCookie(): string {
+  const envCookie = process.env.PI_USAGE_TOKEN_PLAN_COOKIE;
+  if (envCookie?.trim()) return envCookie.trim();
+  const authFilePath = getAuthFilePath();
+  try {
+    const cookie = readAuthConfig()["xiaomi-token-plan-ams"]?.cookie;
+    if (!cookie) throw new Error("xiaomi-token-plan-ams.cookie not found in auth.json");
+    return cookie;
+  } catch (error) {
+    throw authError(error, authFilePath, "Token Plan session cookie");
   }
 }
 
