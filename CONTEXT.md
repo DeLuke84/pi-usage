@@ -57,7 +57,8 @@ _Avoid_: GLM-specific status naming, multiple provider badges, inactive quota di
 - **Codex Usage** mirrors the **GLM Usage** display shape when equivalent limits exist.
 - **Codex Usage** shows only provider-exposed limits when they do not match **GLM Usage** periods.
 - When multiple OpenAI endpoints exist, **Codex Usage** prefers subscription/account limit semantics over per-request token history.
-- **Token Plan Usage** reads the live `platform.xiaomimimo.com` session cookie from the browser's Chromium cookie store at every refresh, because the platform rotates session cookies frequently. `PI_USAGE_TOKEN_PLAN_COOKIE` and `xiaomi-token-plan-ams.cookie` in pi's auth file are manual fallbacks.
+- **Token Plan Usage** reads the live `platform.xiaomimimo.com` session cookie from the browser's Chromium cookie store at every refresh, because the platform rotates session cookies frequently. `PI_USAGE_TOKEN_PLAN_COOKIE` and `xiaomi-token-plan-ams.cookie` in pi's auth file are manual fallbacks; a stored cookie stays in sync with the live browser cookie while it exists.
+- A rejected session cookie is healed by opening the platform console once, which re-issues the cookie set. The rejection message names the remedy and the cookie source that was used.
 - **Token Plan Usage** shows the plan quota window (`plan_total_token`) and compensation credits while they carry a limit. The monthly window (`monthUsage`) mirrors the plan quota and is never shown.
 - **Token Plan Usage** resets at the provider-reported `currentPeriodEnd`.
 - **Codex Usage** shows `Codex` without a plan label when OpenAI does not expose the plan name.

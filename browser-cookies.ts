@@ -147,7 +147,11 @@ function readStoredCookies(profilePath: string): StoredCookie[] {
     } finally {
       db.close();
     }
-  } catch {
+  } catch (error) {
+    console.error(
+      `[pi-usage] cannot read the cookie store at ${profilePath}:`,
+      error instanceof Error ? error.message : error,
+    );
     return [];
   } finally {
     rmSync(tmpDir, { recursive: true, force: true });
@@ -155,7 +159,8 @@ function readStoredCookies(profilePath: string): StoredCookie[] {
 }
 
 function loadBrowserKey(browser: ChromiumBrowser): Buffer | undefined {
-  if (keyCache.has(browser.id)) return keyCache.get(browser.id);
+  const cached = keyCache.get(browser.id);
+  if (cached) return cached;
   let key: Buffer | undefined;
   try {
     const password = execFileSync(
@@ -164,10 +169,15 @@ function loadBrowserKey(browser: ChromiumBrowser): Buffer | undefined {
       { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
     ).trim();
     if (password) key = pbkdf2Sync(password, KEY_SALT, KEY_ITERATIONS, 16, "sha1");
-  } catch {
-    key = undefined;
+  } catch (error) {
+    console.error(
+      `[pi-usage] cannot read the ${browser.id} safe-storage key:`,
+      error instanceof Error ? error.message : error,
+    );
   }
-  keyCache.set(browser.id, key);
+  // Cache only successful reads so a transient keychain failure heals at the
+  // next refresh instead of pinning the fallback for the process lifetime.
+  if (key) keyCache.set(browser.id, key);
   return key;
 }
 

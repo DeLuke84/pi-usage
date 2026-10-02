@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { formatUsageStatus } from "../format.ts";
-import { parseTokenPlanResponses } from "../tokenplan.ts";
+import { fetchTokenPlanUsage, parseTokenPlanResponses } from "../tokenplan.ts";
 
 const DETAIL = {
   code: 0,
@@ -111,4 +111,28 @@ test("rejects details without a period end", () => {
 
 test("surfaces provider error codes", () => {
   assert.throws(() => parseTokenPlanResponses({ code: 41001, message: "quota service down", data: {} }, USAGE), /41001/);
+});
+
+test("names the cookie source and the remedy when the platform rejects the session", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (() => Promise.resolve(new Response("", { status: 401 }))) as typeof fetch;
+  try {
+    for (const [source, label] of [
+      ["env", "PI_USAGE_TOKEN_PLAN_COOKIE"],
+      ["browser", "browser cookie store"],
+      ["stored", "auth.json fallback"],
+    ] as const) {
+      await assert.rejects(
+        fetchTokenPlanUsage({ cookie: "userId=7; api-platform_serviceToken=stale", source }),
+        (error: Error) => {
+          assert.ok(error.message.includes("Token Plan cookie rejected"), error.message);
+          assert.ok(error.message.includes(label), error.message);
+          assert.match(error.message, /open https:\/\/platform\.xiaomimimo\.com once/);
+          return true;
+        },
+      );
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

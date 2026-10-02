@@ -50,7 +50,7 @@ export default function (pi: ExtensionAPI): void {
   async function fetchActiveUsage(provider: UsageProvider, ctx: PiContext): Promise<UsageSnapshot> {
     if (provider === "glm") return quotaToUsageSnapshot(await fetchQuota(getApiKey()));
 
-    if (provider === "token-plan") return fetchTokenPlanUsage({ cookie: getTokenPlanCookie() });
+    if (provider === "token-plan") return fetchTokenPlanUsage(getTokenPlanCookie());
 
     if (provider === "github-copilot") {
       const stored = getGitHubCopilotAuth();

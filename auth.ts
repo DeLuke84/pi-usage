@@ -3,6 +3,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 
 import { readTokenPlanBrowserCookie } from "./browser-cookies";
+import type { TokenPlanAuth } from "./tokenplan";
 
 const DEFAULT_AUTH_PATH = ".pi/agent/auth.json";
 
@@ -75,26 +76,58 @@ export function getGitHubCopilotAuth(): GitHubCopilotAuthConfig {
   }
 }
 
-export function getTokenPlanCookie(): string {
+export function getTokenPlanCookie(
+  readBrowserCookie: () => string | undefined = readTokenPlanBrowserCookie,
+): TokenPlanAuth {
   const envCookie = process.env.PI_USAGE_TOKEN_PLAN_COOKIE;
-  if (envCookie?.trim()) return envCookie.trim();
+  if (envCookie?.trim()) return { cookie: envCookie.trim(), source: "env" };
 
   // The platform rotates session cookies frequently, so the live browser
   // cookie is the primary source and the stored cookie only a fallback.
-  const browserCookie = readTokenPlanBrowserCookie();
-  if (browserCookie) return browserCookie;
+  const browserCookie = readBrowserCookie();
+  if (browserCookie) {
+    keepStoredCookieFresh(browserCookie);
+    return { cookie: browserCookie, source: "browser" };
+  }
 
   const authFilePath = getAuthFilePath();
   try {
     const cookie = readAuthConfig()["xiaomi-token-plan-ams"]?.cookie;
     if (!cookie) {
       throw new Error(
-        "no platform.xiaomimimo.com session cookie found; log in to the MiMo platform in your browser or set PI_USAGE_TOKEN_PLAN_COOKIE",
+        "no platform.xiaomimimo.com session cookie found; open the MiMo platform once in your browser so the console re-issues its session cookie, or set PI_USAGE_TOKEN_PLAN_COOKIE",
       );
     }
-    return cookie;
+    return { cookie, source: "stored" };
   } catch (error) {
     throw authError(error, authFilePath, "Token Plan session cookie");
+  }
+}
+
+/**
+ * Keep the stored `xiaomi-token-plan-ams.cookie` fallback in sync with the
+ * live browser cookie so it cannot rot into a permanent false "expired"
+ * session. Only an already stored cookie is refreshed; the fallback itself
+ * stays opt-in and a missing auth file is not an error here.
+ */
+function keepStoredCookieFresh(cookie: string): void {
+  const authFilePath = getAuthFilePath();
+  try {
+    const config = readAuthConfig();
+    const stored = config["xiaomi-token-plan-ams"]?.cookie;
+    if (!stored || stored === cookie) return;
+    const next: Partial<AuthConfig> = {
+      ...config,
+      "xiaomi-token-plan-ams": { ...config["xiaomi-token-plan-ams"], cookie },
+    };
+    fs.writeFileSync(authFilePath, `${JSON.stringify(next, null, 2)}\n`);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.error(
+        "[pi-usage] could not refresh the stored Token Plan cookie:",
+        error instanceof Error ? error.message : error,
+      );
+    }
   }
 }
 
