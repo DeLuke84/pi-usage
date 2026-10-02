@@ -3,9 +3,18 @@ import type { ResetStyle, UsageLimitView, UsageSnapshot } from "./usage";
 const API_BASE_URL = "https://platform.xiaomimimo.com/api/v1";
 const REQUEST_TIMEOUT_MS = 5000;
 
+export type TokenPlanCookieSource = "env" | "browser" | "stored";
+
 export interface TokenPlanAuth {
   cookie: string;
+  source: TokenPlanCookieSource;
 }
+
+const COOKIE_SOURCE_LABELS: Record<TokenPlanCookieSource, string> = {
+  env: "PI_USAGE_TOKEN_PLAN_COOKIE",
+  browser: "browser cookie store",
+  stored: "auth.json fallback",
+};
 
 const ITEM_LABELS: Record<string, string> = {
   month_total_token: "month",
@@ -54,7 +63,12 @@ export async function fetchTokenPlanUsage(auth: TokenPlanAuth): Promise<UsageSna
       fetch(`${API_BASE_URL}/tokenPlan/usage${query}`, { signal: controller.signal, headers }),
     ]);
     if (detailResponse.status === 401 || usageResponse.status === 401) {
-      throw new Error("Token Plan session expired; refresh the platform.xiaomimimo.com session cookie");
+      // The platform clears rejected session cookies and never re-issues them
+      // on the API. Opening the console once re-issues the cookie set, so the
+      // message names the remedy and the cookie source that was used.
+      throw new Error(
+        `Token Plan cookie rejected (source: ${COOKIE_SOURCE_LABELS[auth.source]}); open https://platform.xiaomimimo.com once so the platform re-issues its session cookie — pi-usage reads it at the next refresh`,
+      );
     }
     if (!detailResponse.ok) throw new Error(`Token Plan detail HTTP ${detailResponse.status}`);
     if (!usageResponse.ok) throw new Error(`Token Plan usage HTTP ${usageResponse.status}`);
