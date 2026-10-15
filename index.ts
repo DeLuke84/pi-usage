@@ -66,6 +66,13 @@ export default function (pi: ExtensionAPI): void {
   async function refreshUsage(ctx: PiContext, dim?: boolean): Promise<void> {
     currentCtx = ctx;
     const seq = ++refreshSeq;
+    // Sign in with ChatGPT uses a different token audience from Codex.
+    // No supported quota endpoint exists for it; never send its token to WHAM.
+    if (ctx.model?.provider === "openai") {
+      return showStatus(ctx.modelRegistry?.isUsingOAuth?.(ctx.model)
+        ? "ChatGPT quota unavailable"
+        : undefined);
+    }
     const provider = selectUsageProvider(ctx.model);
     if (!provider) return showStatus(undefined);
 
@@ -113,9 +120,10 @@ export default function (pi: ExtensionAPI): void {
 
   pi.on("model_select", async (_event, ctx) => {
     currentCtx = ctx as PiContext;
-    if (!selectUsageProvider(currentCtx.model)) return showStatus(undefined);
-    // Mark whatever is currently displayed as stale while fetching new provider's usage.
-    if (lastSnapshot) showSnapshotStatus(lastSnapshot, true);
+    // Only mark a snapshot stale when it belongs to the selected provider.
+    if (lastSnapshot && lastSnapshot.provider === selectUsageProvider(currentCtx.model)) {
+      showSnapshotStatus(lastSnapshot, true);
+    }
     refreshUsage(currentCtx).catch((err) =>
       console.error("[pi-usage] model_select error:", err),
     );

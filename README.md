@@ -8,6 +8,7 @@ Shows subscription quota usage in pi's footer status bar for your active model p
 
 - **z.ai (GLM)** — 5-hour and weekly quotas with dynamic reset times
 - **OpenAI Codex** — Quota windows derived from the API (for example 5-hour/weekly subscriptions or a 30-day Free-plan window)
+- **OpenAI (Sign in with ChatGPT)** — `ChatGPT quota unavailable`; this separate subscription flow has no supported quota endpoint. Review usage at [ChatGPT Settings → Usage](https://chatgpt.com/settings/usage).
 - **Xiaomi MiMo (Token Plan)** — plan quota with the reset at the provider-reported period end (compensation credits while granted)
 
 Displays as a percentage used (e.g., `5h: 16% | week: 4%`).
@@ -97,7 +98,8 @@ plan 47% ↻ Oct23
 - `↻` shows when the quota resets (relative or absolute as appropriate)
 - Plan level shown on the left (when available)
 - Missing quota types are omitted from the display
-- Status entry is hidden for unsupported providers
+- Status entry is hidden for unsupported providers and OpenAI API-key access
+- For `openai` with OAuth, pi's model registry identifies the subscription login. The extension displays `ChatGPT quota unavailable` without reading or refreshing credentials, making quota requests, or substituting Codex limits. OpenAI's [integration guide](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt#6-help-users-manage-their-usage) directs users to ChatGPT Settings → Usage.
 
 ## Configuration
 

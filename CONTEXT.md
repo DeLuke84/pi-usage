@@ -64,7 +64,8 @@ _Avoid_: GLM-specific status naming, multiple provider badges, inactive quota di
 - **Codex Usage** shows `Codex` without a plan label when OpenAI does not expose the plan name.
 - **Subscription Usage** percentages mean used quota, not remaining quota.
 - Relative reset durations are normalized to absolute reset timestamps before display.
-- The **Active Usage Display** is hidden when the selected model's provider has no known **Subscription Usage** source.
+- For `openai` with OAuth, the **Active Usage Display** shows `ChatGPT quota unavailable` without quota requests. This Sign in with ChatGPT flow is separate from **Codex Usage**; its credentials must not be sent to the Codex endpoint. Usage is managed at `https://chatgpt.com/settings/usage`.
+- For `openai` with an API key and other providers without a known **Subscription Usage** source, the **Active Usage Display** is hidden.
 - Cached **Subscription Usage** is valid only for the same selected **Provider**.
 - A selected model change affects the **Active Usage Display** on the next agent run.
 - Long-running agent runs refresh **Subscription Usage** for the active **Provider** every 60 seconds.
@@ -95,5 +96,5 @@ _Avoid_: GLM-specific status naming, multiple provider badges, inactive quota di
 - "Codex plan label" could be guessed, fetched separately, or omitted — resolved: omit plan label unless the usage source exposes it.
 - "percentage" could mean remaining or used quota — resolved: percentages mean used quota to match **GLM Usage**.
 - "reset time" could remain provider text or become normalized time — resolved: normalize relative reset durations to absolute reset timestamps.
-- "unsupported provider" could mean stale usage, explicit unsupported text, or no display — resolved: hide the **Active Usage Display**.
+- "unsupported provider" could mean stale usage, explicit unsupported text, or no display — resolved: hide the **Active Usage Display**, except for the explicit unavailable state of `openai` with OAuth.
 - "automatically switch" could mean immediate model-selector updates or next-run updates — resolved: switch on the next agent run using pi lifecycle hooks.
